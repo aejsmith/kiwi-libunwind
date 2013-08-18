@@ -72,10 +72,18 @@ get_dyn_info_list_addr (unw_addr_space_t as, unw_word_t *dyn_info_list_addr,
 #define PAGE_START(a)	((a) & ~(PAGE_SIZE-1))
 
 static int (*mem_validate_func) (void *addr, size_t len);
+
+#ifdef __Kiwi__
+static int msync_validate (void *addr, size_t len)
+{
+  return 0;
+}
+#else
 static int msync_validate (void *addr, size_t len)
 {
   return msync (addr, len, MS_ASYNC);
 }
+#endif
 
 #ifdef HAVE_MINCORE
 static int mincore_validate (void *addr, size_t len)

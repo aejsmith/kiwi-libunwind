@@ -86,6 +86,11 @@ _Ux86_64_getcontext:
 	movw %gs, UC_MCONTEXT_GS(%rdi)
 #endif
 	movq $UC_MCONTEXT_MC_LEN_VAL, UC_MCONTEXT_MC_LEN(%rdi)
+#elif defined __Kiwi__
+	pushfq
+	.cfi_adjust_cfa_offset 8
+	popq UC_MCONTEXT_RFLAGS(%rdi)
+	.cfi_adjust_cfa_offset -8
 #else
 #error Port me
 #endif

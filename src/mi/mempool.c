@@ -126,8 +126,13 @@ expand (struct mempool *pool)
 HIDDEN void
 mempool_init (struct mempool *pool, size_t obj_size, size_t reserve)
 {
+#if defined(__Kiwi__) && defined(__x86_64__)
+  if (pg_size == 0)
+    pg_size = 4096;
+#else
   if (pg_size == 0)
     pg_size = getpagesize ();
+#endif
 
   memset (pool, 0, sizeof (*pool));
 
