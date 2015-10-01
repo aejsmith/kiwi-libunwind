@@ -40,7 +40,7 @@ aarch64_local_resume (unw_addr_space_t as, unw_cursor_t *cursor, void *arg)
     {
       /* Since there are no signals involved here we restore EH and non scratch
          registers only.  */
-      unsigned long regs[16];
+      unsigned long regs[24];
       regs[0] = uc->uc_mcontext.regs[0];
       regs[1] = uc->uc_mcontext.regs[1];
       regs[2] = uc->uc_mcontext.regs[2];
@@ -57,6 +57,14 @@ aarch64_local_resume (unw_addr_space_t as, unw_cursor_t *cursor, void *arg)
       regs[13] = uc->uc_mcontext.regs[28];
       regs[14] = uc->uc_mcontext.regs[29]; /* FP */
       regs[15] = uc->uc_mcontext.regs[30]; /* LR */
+      regs[16] = GET_FPCTX(uc)->vregs[8];
+      regs[17] = GET_FPCTX(uc)->vregs[9];
+      regs[18] = GET_FPCTX(uc)->vregs[10];
+      regs[19] = GET_FPCTX(uc)->vregs[11];
+      regs[20] = GET_FPCTX(uc)->vregs[12];
+      regs[21] = GET_FPCTX(uc)->vregs[13];
+      regs[22] = GET_FPCTX(uc)->vregs[14];
+      regs[23] = GET_FPCTX(uc)->vregs[15];
       unsigned long sp = uc->uc_mcontext.sp;
 
       struct regs_overlay {
@@ -74,6 +82,10 @@ aarch64_local_resume (unw_addr_space_t as, unw_cursor_t *cursor, void *arg)
         "ldp x25, x26, [x4,80]\n"
         "ldp x27, x28, [x4,96]\n"
         "ldp x29, x30, [x4,112]\n"
+        "ldp d8, d9,   [x4,128]\n"
+        "ldp d10, d11, [x4,144]\n"
+        "ldp d12, d13, [x4,160]\n"
+        "ldp d14, d15, [x4,176]\n"
         "mov sp, x5\n"
         "ret \n"
         :
@@ -148,7 +160,7 @@ establish_machine_state (struct cursor *c)
 
   Debug (8, "copying out cursor state\n");
 
-  for (reg = 0; reg <= UNW_AARCH64_PSTATE; ++reg)
+  for (reg = 0; reg <= UNW_AARCH64_V31; ++reg)
     {
       Debug (16, "copying %s %d\n", unw_regname (reg), reg);
       if (unw_is_fpreg (reg))
